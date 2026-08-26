@@ -1,0 +1,1328 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>مغامرة الحاسوب | Computer Adventure</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23161A48'/%3E%3Crect x='10' y='14' width='44' height='28' rx='4' fill='%2321D6B4'/%3E%3Crect x='16' y='19' width='32' height='18' rx='2' fill='%23161A48'/%3E%3Crect x='24' y='44' width='16' height='4' rx='2' fill='%238467FF'/%3E%3Crect x='18' y='50' width='28' height='3' rx='1.5' fill='%238467FF'/%3E%3Ccircle cx='32' cy='28' r='7' fill='%23F4B740'/%3E%3Cpath d='M28 28l3 3 6-6' stroke='%23161A48' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="description" content="لعبة تعليمية تفاعلية ثنائية اللغة لتعلم أساسيات الحاسوب — Bilingual interactive educational game for computer basics">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700&family=Poppins:wght@500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#0D1030;
+    --navy:#161A48;
+    --navy-soft:#232966;
+    --card:#FBF9F3;
+    --card-2:#F1EEE3;
+    --ink:#191C3F;
+    --ink-soft:#4A4E77;
+    --paper:#F1F0FA;
+    --teal:#21D6B4;
+    --teal-deep:#0FA98C;
+    --violet:#8467FF;
+    --gold:#F4B740;
+    --gold-deep:#D89420;
+    --rose:#FF6B7A;
+    --radius-lg:26px;
+    --radius-md:16px;
+    --radius-sm:10px;
+    --shadow-lift:0 18px 40px -14px rgba(6,8,30,0.55);
+    --ease:cubic-bezier(.22,.9,.32,1);
+    --f-display:'Tajawal','Cairo',sans-serif;
+    --f-body:'Cairo','Segoe UI',Tahoma,Arial,sans-serif;
+  }
+
+  html.lang-en{
+    --f-display:'Poppins','Inter',sans-serif;
+    --f-body:'Inter','Segoe UI',Arial,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(1200px 700px at 15% -10%, #2A3080 0%, transparent 55%),
+      radial-gradient(1000px 800px at 110% 10%, #1D2260 0%, transparent 50%),
+      linear-gradient(180deg, var(--navy-deep) 0%, var(--navy) 55%, var(--navy-deep) 100%);
+    color:var(--paper);
+    font-family:var(--f-body);
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  .circuit-bg{ position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.16; }
+
+  a{color:inherit;}
+  button{font-family:inherit;}
+  h1,h2,h3{font-family:var(--f-display); margin:0;}
+  :focus-visible{outline:3px solid var(--teal); outline-offset:3px; border-radius:8px;}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+  }
+
+  .app{position:relative; z-index:1; min-height:100vh; display:flex; flex-direction:column;}
+
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px clamp(16px,4vw,40px); gap:12px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:10px;}
+  .brand-mark{
+    width:40px; height:40px; border-radius:12px;
+    background:linear-gradient(145deg, var(--teal), var(--violet));
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; box-shadow:var(--shadow-lift); flex:none;
+  }
+  .brand-text{display:flex; flex-direction:column; line-height:1.15;}
+  .brand-text b{font-family:var(--f-display); font-weight:800; font-size:17px;}
+  .brand-text span{font-size:11px; color:#B9BEE8; letter-spacing:.3px;}
+
+  .topbar-right{display:flex; align-items:center; gap:10px;}
+
+  .lang-toggle{
+    display:none; align-items:center; gap:6px;
+    background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.16);
+    border-radius:999px; padding:6px 6px; cursor:pointer;
+  }
+  .lang-toggle.show{display:inline-flex;}
+  .lang-toggle button{
+    border:none; background:transparent; color:#B9BEE8; font-size:12px; font-weight:700;
+    padding:6px 12px; border-radius:999px; cursor:pointer; transition:all .18s var(--ease);
+    font-family:var(--f-display);
+  }
+  .lang-toggle button.active{background:linear-gradient(135deg,var(--teal),var(--violet)); color:#fff;}
+
+  .player-chip{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(255,255,255,.12);
+    padding:6px 14px 6px 8px; border-radius:999px;
+    backdrop-filter:blur(6px);
+    opacity:0; transform:translateY(-6px);
+    transition:opacity .4s var(--ease), transform .4s var(--ease);
+  }
+  .player-chip.show{opacity:1; transform:translateY(0);}
+  .player-avatar-sm{
+    width:32px; height:32px; border-radius:50%;
+    background:linear-gradient(145deg, var(--gold), var(--rose));
+    display:flex; align-items:center; justify-content:center; font-size:17px;
+  }
+  .player-meta{display:flex; flex-direction:column; line-height:1.2;}
+  .player-meta b{font-size:13px; font-family:var(--f-display);}
+  .player-meta .stars-total{font-size:11px; color:var(--gold); display:flex; align-items:center; gap:3px;}
+
+  main{flex:1; display:flex; align-items:center; justify-content:center; padding:10px 16px 40px;}
+
+  .screen{ width:100%; max-width:980px; animation:screenIn .5s var(--ease); }
+  @keyframes screenIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  .hidden{display:none !important;}
+
+  .card{
+    background:var(--card); color:var(--ink); border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-lift); padding:clamp(22px,4vw,44px); position:relative; overflow:hidden;
+  }
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:12px; font-weight:700; color:var(--teal-deep);
+    background:#E4FBF5; padding:5px 12px; border-radius:999px; margin-bottom:14px;
+  }
+
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    border:none; cursor:pointer; font-weight:700; font-family:var(--f-display);
+    border-radius:14px; padding:14px 26px; font-size:16px;
+    transition:transform .18s var(--ease), box-shadow .18s var(--ease), filter .18s var(--ease);
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn:active{transform:translateY(0px) scale(.98);}
+  .btn-primary{ background:linear-gradient(135deg, var(--teal), var(--teal-deep)); color:#04231C; box-shadow:0 12px 24px -10px rgba(33,214,180,.55); }
+  .btn-primary:hover{filter:brightness(1.05);}
+  .btn-ghost{ background:transparent; color:var(--ink); border:2px solid #DCD8C8; }
+  .btn-ghost:hover{border-color:var(--violet); color:var(--violet);}
+  .btn-gold{ background:linear-gradient(135deg, var(--gold), var(--gold-deep)); color:#3A2400; box-shadow:0 12px 24px -10px rgba(244,183,64,.6); }
+  .btn:disabled{opacity:.45; cursor:not-allowed; transform:none;}
+
+  /* ---------- Language select ---------- */
+  .lang-card{text-align:center; max-width:600px; margin:0 auto;}
+  .lang-icon{
+    width:84px; height:84px; margin:0 auto 18px; border-radius:50%;
+    background:linear-gradient(145deg, #E4FBF5, #DCEBFF);
+    display:flex; align-items:center; justify-content:center; font-size:38px;
+    box-shadow:inset 0 0 0 1px rgba(15,169,140,.2);
+  }
+  .lang-title{font-size:24px; font-weight:800; color:var(--ink); margin-bottom:6px; font-family:'Tajawal','Poppins',sans-serif;}
+  .lang-sub{color:var(--ink-soft); margin-bottom:26px; font-size:14.5px; font-family:'Cairo','Inter',sans-serif;}
+  .lang-options{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:520px){ .lang-options{grid-template-columns:1fr;} }
+  .lang-opt{
+    border:2px solid #E3DFCF; background:#fff; border-radius:18px; padding:22px 16px;
+    cursor:pointer; transition:all .18s var(--ease); display:flex; flex-direction:column; align-items:center; gap:8px;
+  }
+  .lang-opt:hover{border-color:var(--teal-deep); transform:translateY(-3px);}
+  .lang-opt .flag{font-size:34px;}
+  .lang-opt b{font-family:'Tajawal',sans-serif; font-size:16px; color:var(--ink);}
+  .lang-opt.en b{font-family:'Poppins',sans-serif;}
+  .lang-opt span{font-size:12px; color:var(--ink-soft);}
+
+  /* ---------- Welcome ---------- */
+  .welcome-grid{display:grid; grid-template-columns:1.15fr .85fr; gap:34px; align-items:center;}
+  @media (max-width:760px){ .welcome-grid{grid-template-columns:1fr;} }
+  .welcome-title{font-size:clamp(28px,4vw,42px); font-weight:900; line-height:1.25; color:var(--ink);}
+  .welcome-title em{font-style:normal; color:var(--teal-deep);}
+  .welcome-sub{color:var(--ink-soft); font-size:16px; line-height:1.9; margin:14px 0 26px;}
+  .feature-list{list-style:none; padding:0; margin:0 0 28px; display:grid; gap:10px;}
+  .feature-list li{display:flex; align-items:center; gap:10px; font-size:14.5px; color:var(--ink);}
+  .feature-dot{width:26px; height:26px; border-radius:8px; background:var(--card-2); display:flex; align-items:center; justify-content:center; font-size:14px; flex:none;}
+
+  .hero-art{
+    position:relative; aspect-ratio:1/1; border-radius:24px;
+    background:linear-gradient(160deg, var(--navy-soft), var(--navy));
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.06);
+  }
+  .hero-art svg{width:78%; height:78%;}
+  .orbit-badge{
+    position:absolute; background:var(--card); color:var(--ink); border-radius:14px;
+    padding:8px 12px; font-size:12px; font-weight:700; box-shadow:var(--shadow-lift);
+    display:flex; align-items:center; gap:6px; font-family:var(--f-display);
+  }
+  .orbit-badge.b1{top:8%; inset-inline-end:6%; animation:float1 6s ease-in-out infinite;}
+  .orbit-badge.b2{bottom:10%; inset-inline-start:4%; animation:float2 7s ease-in-out infinite;}
+  @keyframes float1{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  @keyframes float2{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+
+  /* ---------- Prayer screen ---------- */
+  .prayer-card{text-align:center; max-width:640px; margin:0 auto;}
+  .prayer-icon{
+    width:84px; height:84px; margin:0 auto 18px; border-radius:50%;
+    background:linear-gradient(145deg, #FFF6E0, #FCE9BE);
+    display:flex; align-items:center; justify-content:center; font-size:40px;
+    box-shadow:inset 0 0 0 1px rgba(216,148,32,.25);
+  }
+  .prayer-title{font-size:24px; font-weight:800; color:var(--ink); margin-bottom:10px;}
+  .prayer-text{color:var(--ink-soft); line-height:2; font-size:15.5px; margin-bottom:24px;}
+  .prayer-actions{display:flex; gap:12px; justify-content:center; flex-wrap:wrap;}
+
+  /* ---------- Setup ---------- */
+  .setup-title{font-size:24px; font-weight:800; color:var(--ink); margin-bottom:6px;}
+  .setup-sub{color:var(--ink-soft); margin-bottom:22px; font-size:14.5px;}
+  label.field-label{display:block; font-weight:700; font-size:14px; color:var(--ink); margin-bottom:8px; font-family:var(--f-display);}
+  input#playerName, input#playerAge{
+    width:100%; padding:14px 16px; border-radius:14px; border:2px solid #E3DFCF;
+    font-size:16px; font-family:var(--f-body); color:var(--ink); background:#fff;
+    transition:border-color .2s;
+  }
+  input#playerName:focus, input#playerAge:focus{border-color:var(--teal-deep);}
+  input#playerAge{max-width:160px;}
+  .field-row{display:flex; gap:20px; flex-wrap:wrap; margin-top:20px;}
+  .field-col{flex:1; min-width:180px;}
+  .field-col.age-col{flex:0 0 160px;}
+  .avatar-grid{display:grid; grid-template-columns:repeat(6,1fr); gap:10px; margin:18px 0 26px;}
+  @media (max-width:600px){ .avatar-grid{grid-template-columns:repeat(3,1fr);} }
+  .avatar-opt{
+    aspect-ratio:1/1; border-radius:16px; border:2px solid #E3DFCF; background:#fff;
+    display:flex; align-items:center; justify-content:center; font-size:26px; cursor:pointer;
+    transition:all .18s var(--ease);
+  }
+  .avatar-opt:hover{border-color:var(--violet); transform:translateY(-2px);}
+  .avatar-opt.selected{border-color:var(--teal-deep); background:#E4FBF5; box-shadow:0 0 0 4px rgba(33,214,180,.18);}
+  .field-error{color:var(--rose); font-size:13px; margin-top:8px; min-height:16px; font-weight:600;}
+
+  /* ---------- Level map ---------- */
+  .map-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px; flex-wrap:wrap; gap:10px;}
+  .map-title{font-size:22px; font-weight:800; color:var(--ink);}
+  .map-progress-wrap{display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink-soft); font-weight:700;}
+  .map-progress-bar{width:140px; height:8px; background:#E7E3D4; border-radius:99px; overflow:hidden;}
+  .map-progress-fill{height:100%; background:linear-gradient(90deg,var(--teal),var(--violet)); border-radius:99px; transition:width .6s var(--ease);}
+
+  .path-wrap{position:relative; margin-top:26px;}
+  .level-nodes{position:relative; display:grid; gap:18px; z-index:1;}
+
+  .level-node{
+    display:flex; align-items:center; gap:16px;
+    background:#fff; border:2px solid #ECE8D9; border-radius:18px; padding:14px 18px;
+    cursor:pointer; transition:all .2s var(--ease); text-align:start;
+  }
+  .level-node:hover:not(.locked){border-color:var(--teal-deep); transform:translateY(-2px);}
+  .level-node.locked{cursor:not-allowed; opacity:.6;}
+  .level-node.done{border-color:var(--gold-deep); background:#FFFBF0;}
+  .node-icon{
+    width:52px; height:52px; border-radius:14px; flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:26px;
+    background:var(--card-2);
+  }
+  .level-node.done .node-icon{background:linear-gradient(145deg,var(--gold),var(--gold-deep));}
+  .node-info{flex:1; min-width:0;}
+  .node-info b{font-family:var(--f-display); font-size:15.5px; color:var(--ink); display:block;}
+  .node-info span{font-size:12.5px; color:var(--ink-soft);}
+  .node-stars{display:flex; gap:2px; font-size:15px; flex:none;}
+  .node-lock{font-size:20px; flex:none; color:#B9B4A0;}
+
+  /* ---------- Quiz ---------- */
+  .quiz-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
+  .quiz-level-tag{font-size:13px; font-weight:700; color:var(--violet); font-family:var(--f-display);}
+  .quiz-progress{display:flex; gap:6px;}
+  .quiz-dot{width:22px; height:6px; border-radius:99px; background:#E7E3D4;}
+  .quiz-dot.done{background:var(--teal);}
+  .quiz-dot.active{background:var(--violet);}
+
+  .question-text{font-size:clamp(18px,2.4vw,22px); font-weight:800; color:var(--ink); line-height:1.7; margin-bottom:22px; font-family:var(--f-display);}
+  .options-grid{display:grid; gap:12px;}
+  .option-btn{
+    display:flex; align-items:center; gap:12px; text-align:start;
+    background:#fff; border:2px solid #E3DFCF; border-radius:14px; padding:15px 16px;
+    font-size:15.5px; color:var(--ink); cursor:pointer; transition:all .16s var(--ease); font-weight:600;
+    font-family:var(--f-body);
+  }
+  .option-btn:hover:not(:disabled){border-color:var(--violet);}
+  .option-letter{
+    width:30px; height:30px; border-radius:9px; background:var(--card-2); flex:none;
+    display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:800; font-family:var(--f-display);
+  }
+  .option-btn.correct{border-color:var(--teal-deep); background:#E4FBF5;}
+  .option-btn.correct .option-letter{background:var(--teal); color:#04231C;}
+  .option-btn.wrong{border-color:var(--rose); background:#FFEFF0;}
+  .option-btn.wrong .option-letter{background:var(--rose); color:#fff;}
+  .option-btn:disabled{cursor:default;}
+
+  .feedback-box{
+    margin-top:18px; padding:14px 16px; border-radius:14px; font-size:14.5px; font-weight:600;
+    display:none; align-items:flex-start; gap:10px; line-height:1.8;
+  }
+  .feedback-box.show{display:flex;}
+  .feedback-box.good{background:#E4FBF5; color:#0B5C4B;}
+  .feedback-box.bad{background:#FFF1E9; color:#7A3B12;}
+
+  .quiz-actions{display:flex; justify-content:flex-end; margin-top:22px;}
+
+  /* ---------- Level result ---------- */
+  .result-card{text-align:center; max-width:560px; margin:0 auto;}
+  .result-stars{display:flex; justify-content:center; gap:10px; margin:18px 0 10px; font-size:44px;}
+  .result-stars span{opacity:.25; transition:all .35s var(--ease); transform:scale(.7);}
+  .result-stars span.earned{opacity:1; transform:scale(1);}
+  .result-score{font-size:15px; color:var(--ink-soft); margin-bottom:26px;}
+  .result-title{font-size:22px; font-weight:800; color:var(--ink); margin-bottom:6px;}
+
+  /* ---------- Certificate ---------- */
+  .cert-wrap{max-width:760px; margin:0 auto;}
+  .certificate{
+    border:3px solid var(--gold-deep); border-radius:22px; padding:clamp(24px,5vw,50px);
+    background:
+      radial-gradient(circle at 15% 15%, rgba(244,183,64,.14), transparent 45%),
+      radial-gradient(circle at 90% 85%, rgba(132,103,255,.12), transparent 45%),
+      #fff;
+    text-align:center; position:relative;
+  }
+  .cert-seal{font-size:52px; margin-bottom:6px;}
+  .cert-kicker{font-size:13px; letter-spacing:1px; color:var(--gold-deep); font-weight:800; font-family:var(--f-display);}
+  .cert-title{font-size:clamp(24px,4vw,32px); font-weight:900; color:var(--ink); margin:8px 0 4px;}
+  .cert-name{font-size:clamp(22px,4vw,30px); font-weight:900; color:var(--teal-deep); margin:14px 0; font-family:var(--f-display);}
+  .cert-body{color:var(--ink-soft); font-size:15px; line-height:2; max-width:520px; margin:0 auto 20px;}
+  .cert-stats{display:flex; justify-content:center; gap:26px; margin:20px 0; flex-wrap:wrap;}
+  .cert-stat b{display:block; font-size:22px; color:var(--ink); font-family:var(--f-display);}
+  .cert-stat span{font-size:12px; color:var(--ink-soft);}
+  .cert-actions{display:flex; gap:12px; justify-content:center; margin-top:26px; flex-wrap:wrap;}
+  .cert-credit{margin-top:22px; font-size:11.5px; color:#B9B4A0; letter-spacing:.2px;}
+
+  footer{text-align:center; padding:16px; font-size:12px; color:#8C90C4;}
+  footer .credit{color:#A7ACDE; font-weight:600;}
+
+  @media print{
+    .topbar, footer, .cert-actions{display:none !important;}
+    body{background:#fff !important;}
+    .screen:not(#screen-certificate){display:none !important;}
+    .certificate{box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<svg class="circuit-bg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="#5C63C4" stroke-width="1.4" fill="none">
+    <path d="M0 120 H180 L220 160 H420 L460 120 H700"/>
+    <path d="M0 400 H120 L160 440 H360 V560 L400 600 H620 L660 560 H900"/>
+    <path d="M1200 200 H1000 L960 240 H760"/>
+    <path d="M1200 620 H980 L940 580 H700 L660 620 H520"/>
+    <path d="M300 0 V80 L340 120"/>
+    <path d="M900 800 V700 L860 660"/>
+  </g>
+  <g fill="#5C63C4">
+    <circle cx="180" cy="120" r="4"/><circle cx="420" cy="160" r="4"/><circle cx="460" cy="120" r="4"/>
+    <circle cx="360" cy="440" r="4"/><circle cx="400" cy="600" r="4"/><circle cx="620" cy="600" r="4"/>
+    <circle cx="1000" cy="200" r="4"/><circle cx="760" cy="240" r="4"/>
+    <circle cx="980" cy="620" r="4"/><circle cx="520" cy="620" r="4"/>
+  </g>
+</svg>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">💻</div>
+      <div class="brand-text">
+        <b id="brandName">Computer Adventure</b>
+        <span id="brandTag">مغامرة الحاسوب</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="lang-toggle" id="langToggle">
+        <button type="button" data-lang="ar" id="toggleAr">AR</button>
+        <button type="button" data-lang="en" id="toggleEn">EN</button>
+      </div>
+      <div class="player-chip" id="playerChip">
+        <div class="player-avatar-sm" id="chipAvatar">🙂</div>
+        <div class="player-meta">
+          <b id="chipName">—</b>
+          <span class="stars-total">⭐ <span id="chipStars">0</span> <span id="chipStarsLabel">points</span> · <span id="chipAge"></span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- SCREEN 0: LANGUAGE SELECT -->
+    <section class="screen" id="screen-language">
+      <div class="card lang-card">
+        <div class="lang-icon">🌐</div>
+        <h2 class="lang-title">اختر لغتك · Choose your language</h2>
+        <p class="lang-sub">يمكنك تغيير اللغة لاحقًا في أي وقت · You can change the language anytime later</p>
+        <div class="lang-options">
+          <button type="button" class="lang-opt ar" id="chooseAr">
+            <span class="flag">🇸🇦</span>
+            <b>العربية</b>
+            <span>عرض الموقع باللغة العربية</span>
+          </button>
+          <button type="button" class="lang-opt en" id="chooseEn">
+            <span class="flag">🇬🇧</span>
+            <b>English</b>
+            <span>View the site in English</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 0b: RESUME (returning visitor) -->
+    <section class="screen hidden" id="screen-resume">
+      <div class="card prayer-card">
+        <div class="prayer-icon">👋</div>
+        <h2 class="prayer-title" id="resumeTitle"></h2>
+        <p class="prayer-text" id="resumeText"></p>
+        <div class="prayer-actions">
+          <button class="btn btn-ghost" id="resumeNewBtn"></button>
+          <button class="btn btn-primary" id="resumeContinueBtn"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 1: WELCOME -->
+    <section class="screen hidden" id="screen-welcome">
+      <div class="card">
+        <div class="welcome-grid">
+          <div>
+            <span class="eyebrow" id="welcomeEyebrow"></span>
+            <h1 class="welcome-title" id="welcomeTitle"></h1>
+            <p class="welcome-sub" id="welcomeSub"></p>
+            <ul class="feature-list" id="featureList"></ul>
+            <button class="btn btn-primary" id="startBtn"></button>
+          </div>
+          <div class="hero-art">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="30" y="40" width="140" height="95" rx="10" fill="#2A3080"/>
+              <rect x="42" y="52" width="116" height="71" rx="4" fill="#0FD6B4" opacity="0.85"/>
+              <rect x="70" y="140" width="60" height="10" rx="3" fill="#3A4090"/>
+              <rect x="55" y="150" width="90" height="8" rx="4" fill="#3A4090"/>
+              <circle cx="100" cy="87" r="22" fill="#0D1030"/>
+              <path d="M92 87 l6 6 12 -13" stroke="#F4B740" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="orbit-badge b1" id="badge1"></div>
+            <div class="orbit-badge b2" id="badge2"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: SETUP (name + avatar) -->
+    <section class="screen hidden" id="screen-setup">
+      <div class="card">
+        <h2 class="setup-title" id="setupTitle"></h2>
+        <p class="setup-sub" id="setupSub"></p>
+
+        <div class="field-row">
+          <div class="field-col">
+            <label class="field-label" for="playerName" id="nameLabel"></label>
+            <input type="text" id="playerName" maxlength="20">
+            <div class="field-error" id="nameError"></div>
+          </div>
+          <div class="field-col age-col">
+            <label class="field-label" for="playerAge" id="ageLabel"></label>
+            <input type="number" id="playerAge" min="5" max="18" inputmode="numeric">
+            <div class="field-error" id="ageError"></div>
+          </div>
+        </div>
+
+        <label class="field-label" id="avatarLabel" style="margin-top:20px;"></label>
+        <div class="avatar-grid" id="avatarGrid"></div>
+
+        <button class="btn btn-primary" id="setupContinueBtn" style="width:100%; justify-content:center;"></button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: LEVEL MAP -->
+    <section class="screen hidden" id="screen-map">
+      <div class="card">
+        <div class="map-head">
+          <h2 class="map-title" id="mapTitle"></h2>
+          <div class="map-progress-wrap">
+            <span id="mapProgressLabel">0 / 5</span>
+            <div class="map-progress-bar"><div class="map-progress-fill" id="mapProgressFill" style="width:0%"></div></div>
+          </div>
+        </div>
+        <div class="path-wrap">
+          <div class="level-nodes" id="levelNodes"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 5: QUIZ -->
+    <section class="screen hidden" id="screen-quiz">
+      <div class="card">
+        <div class="quiz-top">
+          <span class="quiz-level-tag" id="quizLevelTag"></span>
+          <div class="quiz-progress" id="quizProgress"></div>
+        </div>
+        <h3 class="question-text" id="questionText"></h3>
+        <div class="options-grid" id="optionsGrid"></div>
+        <div class="feedback-box" id="feedbackBox">
+          <span id="feedbackIcon">✅</span>
+          <span id="feedbackText"></span>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn btn-primary" id="nextQBtn" disabled></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 6: LEVEL RESULT -->
+    <section class="screen hidden" id="screen-result">
+      <div class="card result-card">
+        <div class="eyebrow" id="resultBadge"></div>
+        <h2 class="result-title" id="resultTitle"></h2>
+        <div class="result-stars" id="resultStars">
+          <span>⭐</span><span>⭐</span><span>⭐</span>
+        </div>
+        <p class="result-score" id="resultScore"></p>
+        <div class="prayer-actions">
+          <button class="btn btn-ghost" id="resultMapBtn"></button>
+          <button class="btn btn-primary" id="resultNextBtn"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 7: CERTIFICATE -->
+    <section class="screen hidden" id="screen-certificate">
+      <div class="cert-wrap">
+        <div class="certificate">
+          <div class="cert-seal">🏆</div>
+          <div class="cert-kicker" id="certKicker"></div>
+          <h2 class="cert-title" id="certTitle"></h2>
+          <div class="cert-name" id="certName">—</div>
+          <p class="cert-body" id="certMessage"></p>
+          <div class="cert-stats">
+            <div class="cert-stat"><b id="certStars">0</b><span id="certStarsLabel"></span></div>
+            <div class="cert-stat"><b id="certScore">0%</b><span id="certScoreLabel"></span></div>
+            <div class="cert-stat"><b id="certLevel">—</b><span id="certLevelLabel"></span></div>
+            <div class="cert-stat"><b id="certAge">—</b><span id="certAgeLabel"></span></div>
+          </div>
+          <div class="cert-actions">
+            <button class="btn btn-ghost" id="printCertBtn"></button>
+            <button class="btn btn-gold" id="restartBtn"></button>
+          </div>
+          <div class="cert-credit" id="certCredit"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer id="siteFooter"></footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var DEVELOPER_NAME = "لطفي شيخ زيد";
+  var DEVELOPER_NAME_EN = "Lotfi Cheikh Zied";
+
+  /* ---------------- Local device storage: DISABLED in this Sheet-only build ----------------
+     This build intentionally does not use browser storage. Progress lives only in memory
+     for the current session, and is sent to the central Google Sheet as the single record.
+  ------------------------------------------------------------------------------------------ */
+
+  /* ---------------- UI Strings ---------------- */
+  var UI = {
+    ar:{
+      brandName:"مغامرة الحاسوب", brandTag:"رحلة تعلّم أساسيات التقنية",
+      welcomeEyebrow:"🧭 لعبة تعليمية تفاعلية · من 8 إلى 15 سنة",
+      welcomeTitleHTML:'اكتشف عالم <em>الحاسوب والتقنية</em> خطوة بخطوة',
+      welcomeSub:"انضم إلى رحلة ممتعة عبر خمس مراحل تعلّمك أساسيات الحاسوب، والبرمجيات، والأمان الرقمي، وكيف توازن بين التقنية وحياتك وصحتك — واجمع النجوم لتحصل على شهادة تقدير في النهاية.",
+      features:["🧩 5 مراحل تعليمية بأسئلة متنوعة وممتعة","🏅 نجوم ونقاط تُجمع مع كل إجابة صحيحة","🎓 شهادة تقدير مخصصة باسمك في النهاية"],
+      startBtn:"ابدأ الرحلة ←",
+      badge1:"⭐ +10 نقاط", badge2:"🔒 آمن دائمًا",
+      setupTitle:"من أنت يا بطل؟", setupSub:"اختر اسمك وشخصيتك المفضلة لتبدأ رحلتك في عالم التقنية",
+      nameLabel:"اسمك", namePlaceholder:"اكتب اسمك هنا", nameError:"من فضلك اكتب اسمك أولًا.",
+      ageLabel:"عمرك", agePlaceholder:"مثال: 10", ageErrorEmpty:"من فضلك اكتب عمرك.", ageErrorRange:"يُرجى إدخال عمر بين 5 و 18 سنة.",
+      avatarLabel:"اختر شخصيتك", setupContinueBtn:"ابدأ المغامرة 🚀",
+      mapTitle:"خريطة المراحل", mapProgress:function(d,t){return d+" / "+t+" مراحل";},
+      pointsLabel:"نقطة",
+      quizLevelTag:function(n,t){return "المرحلة "+n+" · "+t;},
+      nextBtn:"التالي ←", showResultBtn:"عرض النتيجة ←",
+      feedbackGood:"إجابة صحيحة! ", feedbackBad:"ليست إجابة صحيحة. ",
+      optionLetters:["أ","ب","ج","د"],
+      resultBadge3:"🎉 ممتاز!", resultBadge2:"👏 عمل جيد!", resultBadge1:"🌱 استمر بالتعلم!",
+      resultTitle:function(t){return "أكملت مرحلة: "+t;},
+      resultScore:function(c,t){return c+" من "+t+" إجابات صحيحة";},
+      resultMapBtn:"خريطة المراحل", resultNextBtn:"المرحلة التالية ←", resultCertBtn:"استلم شهادتك 🎓",
+      certKicker:"شهادة تقدير وإنجاز", certTitle:"مغامرة الحاسوب",
+      certStarsLabel:"نجمة ⭐", certScoreLabel:"نسبة الإجابات الصحيحة", certLevelLabel:"اللقب المكتسب", certAgeLabel:"العمر", ageSuffix:"سنة",
+      certMsgHigh:"لقد أظهرت فهمًا رائعًا لأساسيات الحاسوب والتقنية، واجتزت جميع المراحل بجدارة وتميّز. استمر في التعلّم واستخدم التقنية دائمًا بحكمة توازن بين حياتك وصحتك.",
+      certMsgMid:"أحسنت! لقد أكملت جميع مراحل الرحلة وتعلّمت أساسيات مهمة عن الحاسوب والتقنية. واصل التدرب لتصبح أكثر خبرة يومًا بعد يوم.",
+      certMsgLow:"لقد أكملت رحلتك بنجاح! التعلّم يحتاج إلى وقت وتكرار، وأنت بدأت خطوتك الأولى في عالم التقنية. حاول مرة أخرى لتحسّن نتيجتك أكثر.",
+      printCertBtn:"🖨️ طباعة الشهادة", restartBtn:"↺ العب مرة أخرى",
+      certCredit:"تصميم وتطوير المنصة: " + DEVELOPER_NAME,
+      resumeTitle:"مرحبًا بعودتك! 👋",
+      resumeText:function(name){return "لاحظنا أن لديك تقدمًا محفوظًا باسم \""+name+"\" على هذا الجهاز. هل تريد إكمال رحلتك من حيث توقفت، أم البدء من جديد؟";},
+      resumeContinueBtn:"إكمال رحلتي ←", resumeNewBtn:"ابدأ من جديد",
+      resumeTitle:"مرحبًا بعودتك! 👋",
+      resumeText:function(name){return "لاحظنا أن لديك تقدمًا محفوظًا باسم \""+name+"\" على هذا الجهاز. هل تريد إكمال رحلتك من حيث توقفت، أم البدء من جديد؟";},
+      resumeContinueBtn:"إكمال رحلتي ←", resumeNewBtn:"ابدأ من جديد",
+      footer:"مغامرة الحاسوب © موقع تعليمي مخصص للأطفال واليافعين — التعلم أولًا، والمتعة دائمًا 💙",
+      footerCredit:"تطوير: " + DEVELOPER_NAME
+    },
+    en:{
+      brandName:"Computer Adventure", brandTag:"A journey to learn tech fundamentals",
+      welcomeEyebrow:"🧭 Interactive Educational Game · Ages 8 to 15",
+      welcomeTitleHTML:'Discover the world of <em>Computers & Technology</em> step by step',
+      welcomeSub:"Join a fun journey through five stages that teach you computer basics, software, digital safety, and how to balance technology with your life and health — collect stars and earn a certificate of appreciation at the end.",
+      features:["🧩 5 educational levels with fun, varied questions","🏅 Stars and points collected with every correct answer","🎓 A personalized certificate of appreciation at the end"],
+      startBtn:"Start the Journey →",
+      badge1:"⭐ +10 points", badge2:"🔒 Always Safe",
+      setupTitle:"Who are you, champion?", setupSub:"Choose your name and favorite character to start your journey into the world of technology",
+      nameLabel:"Your name", namePlaceholder:"Type your name here", nameError:"Please type your name first.",
+      ageLabel:"Your age", agePlaceholder:"e.g. 10", ageErrorEmpty:"Please enter your age.", ageErrorRange:"Please enter an age between 5 and 18.",
+      avatarLabel:"Choose your character", setupContinueBtn:"Start the Adventure 🚀",
+      mapTitle:"Level Map", mapProgress:function(d,t){return d+" / "+t+" levels";},
+      pointsLabel:"points",
+      quizLevelTag:function(n,t){return "Level "+n+" · "+t;},
+      nextBtn:"Next →", showResultBtn:"Show Result →",
+      feedbackGood:"Correct! ", feedbackBad:"Not quite. ",
+      optionLetters:["A","B","C","D"],
+      resultBadge3:"🎉 Excellent!", resultBadge2:"👏 Good job!", resultBadge1:"🌱 Keep learning!",
+      resultTitle:function(t){return "You completed level: "+t;},
+      resultScore:function(c,t){return c+" out of "+t+" correct answers";},
+      resultMapBtn:"Level Map", resultNextBtn:"Next Level →", resultCertBtn:"Get Your Certificate 🎓",
+      certKicker:"Certificate of Appreciation & Achievement", certTitle:"Computer Adventure",
+      certStarsLabel:"Stars ⭐", certScoreLabel:"Correct Answer Rate", certLevelLabel:"Earned Title", certAgeLabel:"Age", ageSuffix:"years",
+      certMsgHigh:"You've shown a wonderful understanding of computer and technology basics, and completed all levels with excellence. Keep learning and always use technology wisely, balancing your life and health.",
+      certMsgMid:"Well done! You completed all stages of the journey and learned important basics about computers and technology. Keep practicing to become more skilled every day.",
+      certMsgLow:"You completed your journey successfully! Learning takes time and repetition, and you've taken your first step into the world of technology. Try again to improve your score even more.",
+      printCertBtn:"🖨️ Print Certificate", restartBtn:"↺ Play Again",
+      certCredit:"Platform designed & developed by: " + DEVELOPER_NAME_EN,
+      resumeTitle:"Welcome back! 👋",
+      resumeText:function(name){return "We found saved progress for \""+name+"\" on this device. Would you like to continue your journey, or start fresh?";},
+      resumeContinueBtn:"Continue My Journey →", resumeNewBtn:"Start New",
+      resumeTitle:"Welcome back! 👋",
+      resumeText:function(name){return "We found saved progress for \""+name+"\" on this device. Would you like to continue your journey, or start fresh?";},
+      resumeContinueBtn:"Continue My Journey →", resumeNewBtn:"Start New",
+      footer:"Computer Adventure © An educational site for kids and teens — Learning first, fun always 💙",
+      footerCredit:"Developed by: " + DEVELOPER_NAME_EN
+    }
+  };
+
+  var APPRECIATION = {
+    ar:{
+      high:["مبدع رقمي 🌟","خبير تقنية صاعد 🚀","نجم الحاسوب اللامع ✨"],
+      mid:["مستكشف تقني نشيط 🧭","متعلم واعد 🌱","مجتهد في عالم التقنية 💡"],
+      low:["مستكشف مبتدئ 🌤️","متعلم في بداية الطريق 🧩","صاحب همّة وشغف بالتعلّم 💙"]
+    },
+    en:{
+      high:["Digital Creator 🌟","Rising Tech Expert 🚀","Shining Computer Star ✨"],
+      mid:["Active Tech Explorer 🧭","Promising Learner 🌱","Dedicated Tech Learner 💡"],
+      low:["Beginner Explorer 🌤️","Learner at the Start of the Path 🧩","Passionate & Determined Learner 💙"]
+    }
+  };
+
+  var AVATARS = ["🤖","🧑‍🚀","🧑‍💻","🦸","🧑‍🔬","🎮"];
+
+  /* ---------------- Levels (bilingual) ---------------- */
+  var LEVELS = [
+    {
+      id:1, icon:"🖥️",
+      title:{ar:"مكوّنات الحاسوب", en:"Computer Components"},
+      desc:{ar:"تعرّف على أجزاء الحاسوب الأساسية", en:"Learn about the basic parts of a computer"},
+      questions:[
+        {
+          q:{ar:"أي من هذه الأجزاء يُعتبر «عقل» الحاسوب الذي يُنفّذ العمليات؟", en:"Which of these parts is considered the \u201cbrain\u201d of the computer that executes operations?"},
+          options:{ar:["المعالج (CPU)","الفأرة","السماعة","الطابعة"], en:["The Processor (CPU)","The Mouse","The Speaker","The Printer"]},
+          correct:0,
+          explain:{ar:"المعالج هو الجزء المسؤول عن تنفيذ العمليات وتشغيل كل شيء داخل الحاسوب.", en:"The CPU is responsible for executing operations and running everything inside the computer."}
+        },
+        {
+          q:{ar:"ما الجهاز الذي نستخدمه للكتابة على الحاسوب؟", en:"Which device do we use to type on the computer?"},
+          options:{ar:["الطابعة","لوحة المفاتيح","الميكروفون","السماعة"], en:["The Printer","The Keyboard","The Microphone","The Speaker"]},
+          correct:1,
+          explain:{ar:"لوحة المفاتيح (Keyboard) هي أداة إدخال النصوص والأوامر.", en:"The keyboard is the input tool for typing text and commands."}
+        },
+        {
+          q:{ar:"أين تُخزَّن الملفات بشكل دائم حتى بعد إغلاق الجهاز؟", en:"Where are files stored permanently, even after the device is turned off?"},
+          options:{ar:["الذاكرة العشوائية RAM","الشاشة","القرص الصلب (Hard Disk)","الفأرة"], en:["RAM (Random Access Memory)","The Screen","The Hard Disk","The Mouse"]},
+          correct:2,
+          explain:{ar:"القرص الصلب يحفظ الملفات بشكل دائم، بعكس الذاكرة العشوائية التي تُمسح عند إغلاق الجهاز.", en:"The hard disk stores files permanently, unlike RAM which is cleared when the device turns off."}
+        },
+        {
+          q:{ar:"ما وظيفة الفأرة (Mouse) في الحاسوب؟", en:"What is the function of the mouse in a computer?"},
+          options:{ar:["تخزين الملفات","تشغيل الصوت","التحكم بالمؤشر واختيار العناصر","طباعة الأوراق"], en:["Storing files","Playing sound","Controlling the cursor and selecting items","Printing paper"]},
+          correct:2,
+          explain:{ar:"الفأرة تساعدنا على تحريك المؤشر والنقر على العناصر على الشاشة.", en:"The mouse helps us move the cursor and click on items on the screen."}
+        },
+        {
+          q:{ar:"أي جهاز يُستخدم لإخراج الأوراق المطبوعة؟", en:"Which device is used to produce printed papers?"},
+          options:{ar:["الماسح الضوئي","السماعة","الشاشة","الطابعة"], en:["The Scanner","The Speaker","The Screen","The Printer"]},
+          correct:3,
+          explain:{ar:"الطابعة (Printer) تحوّل الملفات الرقمية إلى أوراق مطبوعة.", en:"The printer turns digital files into printed paper documents."}
+        }
+      ]
+    },
+    {
+      id:2, icon:"💾",
+      title:{ar:"البرمجيات ونظام التشغيل", en:"Software & Operating Systems"},
+      desc:{ar:"افهم الفرق بين البرامج والأجهزة", en:"Understand the difference between software and hardware"},
+      questions:[
+        {
+          q:{ar:"ما هو نظام التشغيل؟", en:"What is an operating system?"},
+          options:{ar:["برنامج يدير عمل الحاسوب ويُشغّل باقي البرامج","لعبة إلكترونية فقط","جهاز لتخزين الصور","نوع من الطابعات"], en:["A program that manages the computer and runs other programs","Just a video game","A device for storing photos","A type of printer"]},
+          correct:0,
+          explain:{ar:"نظام التشغيل هو البرنامج الرئيسي الذي يدير كل شيء في الحاسوب ويسمح للبرامج الأخرى بالعمل.", en:"The operating system is the main program that manages everything in the computer and lets other programs run."}
+        },
+        {
+          q:{ar:"أي مما يلي يُعتبر نظام تشغيل؟", en:"Which of the following is an operating system?"},
+          options:{ar:["Word","Windows","PowerPoint","Chrome"], en:["Word","Windows","PowerPoint","Chrome"]},
+          correct:1,
+          explain:{ar:"Windows هو نظام تشغيل، بينما البقية برامج تعمل فوق نظام التشغيل.", en:"Windows is an operating system, while the others are programs that run on top of an operating system."}
+        },
+        {
+          q:{ar:"ما الفرق الصحيح بين البرنامج (Software) والجهاز (Hardware)؟", en:"What is the correct difference between software and hardware?"},
+          options:{ar:["لا فرق بينهما أبدًا","Hardware هو نفسه البرامج","Software غير ملموس ويُدار بالبرمجة، وHardware أجزاء مادية ملموسة","كلاهما نفس الشيء دائمًا"], en:["There is no difference at all","Hardware is the same as software","Software is intangible and managed by code, while hardware is physical, tangible parts","Both are always the same thing"]},
+          correct:2,
+          explain:{ar:"البرمجيات أكواد وبرامج غير ملموسة، بينما الأجهزة (Hardware) قطع مادية يمكن لمسها.", en:"Software consists of intangible code and programs, while hardware refers to physical parts you can touch."}
+        },
+        {
+          q:{ar:"ما اسم البرنامج الذي نستخدمه عادةً لكتابة المستندات؟", en:"What program do we usually use to write documents?"},
+          options:{ar:["مشغّل الفيديو","متصفح الإنترنت","معالج النصوص مثل Word","برنامج الرسام فقط"], en:["A video player","A web browser","A word processor like Word","Only a paint program"]},
+          correct:2,
+          explain:{ar:"معالج النصوص مثل Word مخصص لكتابة وتنسيق المستندات.", en:"A word processor like Word is designed for writing and formatting documents."}
+        },
+        {
+          q:{ar:"ما هو التطبيق (App)؟", en:"What is an app?"},
+          options:{ar:["جزء من الفأرة","برنامج مصمم لأداء مهمة معينة على الجهاز","قطعة داخل المعالج","نوع من الكابلات"], en:["A part of the mouse","A program designed to perform a specific task on a device","A piece inside the processor","A type of cable"]},
+          correct:1,
+          explain:{ar:"التطبيق برنامج صُمم لأداء وظيفة محددة، مثل تطبيق للرسم أو الألعاب أو التعلم.", en:"An app is a program designed to perform a specific function, like drawing, gaming, or learning."}
+        }
+      ]
+    },
+    {
+      id:3, icon:"🌐",
+      title:{ar:"الإنترنت والأمان الرقمي", en:"Internet & Digital Safety"},
+      desc:{ar:"تعلّم كيف تحمي نفسك على الإنترنت", en:"Learn how to protect yourself online"},
+      questions:[
+        {
+          q:{ar:"ماذا نسمي الكلمة السرية التي تحمي حسابك؟", en:"What do we call the secret word that protects your account?"},
+          options:{ar:["اسم المستخدم","البريد الإلكتروني","كلمة المرور (Password)","الرابط"], en:["Username","Email","Password","Link"]},
+          correct:2,
+          explain:{ar:"كلمة المرور هي مفتاح سري يجب ألا يعرفه أحد غيرك.", en:"A password is a secret key that only you should know."}
+        },
+        {
+          q:{ar:"إذا أرسل لك شخص غريب رابطًا لا تعرفه، ماذا يجب أن تفعل؟", en:"If a stranger sends you an unfamiliar link, what should you do?"},
+          options:{ar:["تفتحه فورًا لتعرف ما هو","لا تفتحه وتخبر أحد الوالدين أو المعلم","ترسله لكل أصدقائك","تُدخل بياناتك فيه"], en:["Open it immediately to see what it is","Don't open it and tell a parent or teacher","Send it to all your friends","Enter your information into it"]},
+          correct:1,
+          explain:{ar:"الروابط غير المعروفة قد تكون خطيرة، والأصح دائمًا هو عدم فتحها وإخبار شخص تثق به.", en:"Unknown links can be dangerous; the right thing is to never open them and tell someone you trust."}
+        },
+        {
+          q:{ar:"أي من هذه تُعتبر «معلومات شخصية» يجب عدم مشاركتها مع الغرباء؟", en:"Which of these is considered \u201cpersonal information\u201d that should not be shared with strangers?"},
+          options:{ar:["لونك المفضل","اسمك الكامل وعنوانك ورقم هاتفك","اسم لعبتك المفضلة","حالة الطقس"], en:["Your favorite color","Your full name, address, and phone number","Your favorite game's name","The weather"]},
+          correct:1,
+          explain:{ar:"المعلومات الشخصية كالاسم الكامل والعنوان ورقم الهاتف يجب أن تبقى سرية وخاصة.", en:"Personal information like your full name, address, and phone number should stay private and safe."}
+        },
+        {
+          q:{ar:"ما أفضل وصف لكلمة مرور قوية؟", en:"What best describes a strong password?"},
+          options:{ar:["الرقم 1234","اسمك فقط","تاريخ ميلادك فقط","مزيج من حروف وأرقام ورموز يصعب تخمينه"], en:["The number 1234","Your name only","Your birth date only","A mix of letters, numbers, and symbols that's hard to guess"]},
+          correct:3,
+          explain:{ar:"كلمة المرور القوية تجمع بين حروف كبيرة وصغيرة وأرقام ورموز، ويصعب على الآخرين تخمينها.", en:"A strong password combines uppercase and lowercase letters, numbers, and symbols, making it hard for others to guess."}
+        },
+        {
+          q:{ar:"ماذا تفعل إذا شعرت بالإزعاج من رسائل شخص على الإنترنت؟", en:"What should you do if you feel uncomfortable with someone's messages online?"},
+          options:{ar:["تتجاهل الأمر وتستمر بالتحدث معه","تخبر أحد الوالدين أو شخصًا تثق به فورًا","تحذفه فقط دون إخبار أحد","تردّ عليه بنفس الطريقة"], en:["Ignore it and keep talking to them","Tell a parent or someone you trust immediately","Just delete them without telling anyone","Reply the same way"]},
+          correct:1,
+          explain:{ar:"إخبار شخص بالغ تثق به هو الخطوة الصحيحة دائمًا عند الشعور بالإزعاج أو الخطر.", en:"Telling a trusted adult is always the right step when you feel uncomfortable or unsafe."}
+        }
+      ]
+    },
+    {
+      id:4, icon:"⚖️",
+      title:{ar:"التقنية والصحة والحياة", en:"Technology, Health & Life"},
+      desc:{ar:"وازن بين استخدام التقنية وحياتك اليومية", en:"Balance technology use with your daily life"},
+      questions:[
+        {
+          q:{ar:"ما الوقت المناسب لأخذ استراحة أثناء استخدام الشاشة لإراحة عينيك؟", en:"What is a good time to take a break while using a screen, to rest your eyes?"},
+          options:{ar:["بعد 5 ساعات متواصلة","كل 20-30 دقيقة تقريبًا","لا داعي لأخذ استراحة أبدًا","فقط عند الشعور بألم شديد"], en:["After 5 hours straight","Roughly every 20-30 minutes","No break is ever needed","Only when you feel severe pain"]},
+          correct:1,
+          explain:{ar:"يُنصح بأخذ استراحة قصيرة كل 20-30 دقيقة لإراحة العينين والجسم.", en:"It's recommended to take a short break every 20-30 minutes to rest your eyes and body."}
+        },
+        {
+          q:{ar:"أي من هذه الأنشطة يساعد على التوازن بين التقنية والحياة؟", en:"Which of these activities helps balance technology and life?"},
+          options:{ar:["البقاء أمام الشاشة طوال اليوم","تجاهل الواجبات المدرسية","اللعب في الهواء الطلق والقراءة والتحدث مع العائلة","النوم متأخرًا بسبب الألعاب"], en:["Staying in front of a screen all day","Ignoring your schoolwork","Playing outdoors, reading, and talking with family","Staying up late because of games"]},
+          correct:2,
+          explain:{ar:"الأنشطة المتنوعة كاللعب بالخارج والقراءة والوقت مع العائلة تصنع توازنًا صحيًا مع استخدام التقنية.", en:"Varied activities like outdoor play, reading, and family time create a healthy balance with technology use."}
+        },
+        {
+          q:{ar:"لماذا يُفضَّل عدم استخدام الجهاز قبل النوم مباشرة؟", en:"Why is it better to avoid using a device right before sleep?"},
+          options:{ar:["لأنه يجعل الجهاز ساخنًا فقط","لأن ضوء الشاشة يؤثر على جودة النوم","لا يوجد سبب حقيقي","لأنه يستهلك بطارية الجهاز فقط"], en:["It only makes the device hot","Screen light affects sleep quality","There's no real reason","It only drains the battery"]},
+          correct:1,
+          explain:{ar:"ضوء الشاشات يؤثر على هرمونات النوم، لذا يُفضَّل تركها قبل النوم بوقت كافٍ.", en:"Screen light affects sleep hormones, so it's best to put devices away with enough time before bed."}
+        },
+        {
+          q:{ar:"ما الفرق بين استخدام التقنية للتعلّم واستخدامها للتسلية المفرطة طوال الوقت؟", en:"What's the difference between using technology for learning versus excessive entertainment all the time?"},
+          options:{ar:["لا فرق بينهما إطلاقًا","التعلّم يطوّر المهارات، والإفراط بالتسلية يقلّل وقت الأنشطة المهمة الأخرى","التسلية دائمًا أفضل من التعلّم","التعلّم مضيعة للوقت"], en:["There's no difference at all","Learning builds skills, while excessive entertainment reduces time for other important activities","Entertainment is always better than learning","Learning is a waste of time"]},
+          correct:1,
+          explain:{ar:"استخدام التقنية للتعلّم يبني مهارات مفيدة، أما الإفراط في التسلية فقد يأخذ وقتًا من أنشطة مهمة أخرى.", en:"Using technology for learning builds useful skills, while excessive entertainment can take time away from other important activities."}
+        },
+        {
+          q:{ar:"ما العادة الصحية الجيدة عند الجلوس أمام الحاسوب؟", en:"What's a good healthy habit when sitting at a computer?"},
+          options:{ar:["الاقتراب جدًا من الشاشة","الجلوس بوضعية مستقيمة والحفاظ على مسافة مناسبة عن الشاشة","وضع الجهاز على الركبتين لساعات طويلة","الجلوس منحنيًا بأي شكل"], en:["Getting very close to the screen","Sitting up straight and keeping a proper distance from the screen","Keeping the device on your knees for long hours","Slouching in any position"]},
+          correct:1,
+          explain:{ar:"الجلوس بشكل صحيح والمسافة المناسبة عن الشاشة يحميان ظهرك وعينيك.", en:"Sitting correctly and keeping a proper distance from the screen protects your back and eyes."}
+        }
+      ]
+    },
+    {
+      id:5, icon:"🏆",
+      title:{ar:"مراجعة شاملة وتحدي القمة", en:"Full Review & Top Challenge"},
+      desc:{ar:"اختبر كل ما تعلمته في تحدٍّ نهائي", en:"Test everything you've learned in a final challenge"},
+      questions:[
+        {
+          q:{ar:"أي جزء من الحاسوب يُخزّن المعلومات مؤقتًا أثناء التشغيل فقط؟", en:"Which part of the computer stores information temporarily, only while it's running?"},
+          options:{ar:["القرص الصلب","الذاكرة العشوائية RAM","الطابعة","الفأرة"], en:["The hard disk","RAM (Random Access Memory)","The printer","The mouse"]},
+          correct:1,
+          explain:{ar:"الذاكرة العشوائية RAM تخزن البيانات مؤقتًا أثناء التشغيل، وتُمسح عند إغلاق الجهاز.", en:"RAM stores data temporarily while the computer runs, and it's cleared when the device turns off."}
+        },
+        {
+          q:{ar:"ما اسم الشبكة العالمية التي تربط ملايين الأجهزة ببعضها؟", en:"What's the name of the global network that connects millions of devices together?"},
+          options:{ar:["المعالج","الإنترنت","لوحة المفاتيح","الشاشة"], en:["The processor","The Internet","The keyboard","The screen"]},
+          correct:1,
+          explain:{ar:"الإنترنت شبكة عالمية تربط ملايين الأجهزة حول العالم لتبادل المعلومات.", en:"The Internet is a global network connecting millions of devices worldwide to exchange information."}
+        },
+        {
+          q:{ar:"ماذا يجب أن تتضمّن كلمة المرور الجيدة عند إنشاء بريد إلكتروني جديد؟", en:"What should a strong password include when creating a new email account?"},
+          options:{ar:["اسمك فقط","الرقم 0000","حروف كبيرة وصغيرة وأرقام ورموز","تاريخ ميلادك فقط"], en:["Your name only","The number 0000","Uppercase and lowercase letters, numbers, and symbols","Your birth date only"]},
+          correct:2,
+          explain:{ar:"كلمة المرور القوية تجمع عدة أنواع من الرموز لتكون صعبة التخمين.", en:"A strong password combines several types of characters to make it hard to guess."}
+        },
+        {
+          q:{ar:"ما الهدف من «التوازن الرقمي» (Digital Balance)؟", en:"What is the goal of \u201cDigital Balance\u201d?"},
+          options:{ar:["استخدام الجهاز طوال اليوم بدون توقف","استخدام التقنية بشكل مفيد دون التأثير على الصحة والحياة الاجتماعية","تجنّب استخدام التقنية نهائيًا","اللعب فقط دون تعلّم"], en:["Using the device all day without stopping","Using technology in a beneficial way without harming your health and social life","Avoiding technology completely","Only playing games without learning"]},
+          correct:1,
+          explain:{ar:"التوازن الرقمي يعني الاستفادة من التقنية دون أن تؤثر سلبًا على صحتك أو علاقاتك.", en:"Digital balance means benefiting from technology without letting it negatively affect your health or relationships."}
+        },
+        {
+          q:{ar:"ما أفضل تصرف قبل مشاركة معلومة وجدتها على الإنترنت مع أصدقائك؟", en:"What's the best thing to do before sharing information you found online with your friends?"},
+          options:{ar:["مشاركتها فورًا من غير تفكير","التأكد أنها من مصدر موثوق وصحيحة أولًا","تغيير الحقائق فيها لتصبح أكثر إثارة","تجاهل التأكد لأنه غير مهم"], en:["Share it right away without thinking","Make sure it's from a trustworthy, accurate source first","Change the facts to make it more exciting","Don't bother checking, it's not important"]},
+          correct:1,
+          explain:{ar:"قبل مشاركة أي معلومة، من المهم التأكد أنها صحيحة ومن مصدر موثوق، حتى لا تنشر معلومات خاطئة عن غير قصد.", en:"Before sharing any information, it's important to verify it's accurate and from a trustworthy source, so you don't accidentally spread misinformation."}
+        }
+      ]
+    }
+  ];
+
+  /* ---------------- State ---------------- */
+  var state = {
+    lang:null,
+    name:"", age:null, avatar:AVATARS[0],
+    currentLevel:0, currentQ:0, levelCorrect:0,
+    levelStars:{}, levelDone:{},
+    totalStars:0, totalCorrect:0,
+    totalQuestions:LEVELS.reduce(function(s,l){return s+l.questions.length;},0),
+    answeredThisQ:false,
+    currentScreen:"screen-language",
+    lastResult:null,
+    certLogged:false
+  };
+
+  /* ---------------- Helpers ---------------- */
+  function $(id){ return document.getElementById(id); }
+  function T(){ return UI[state.lang || "ar"]; }
+  function escapeHTML(str){
+    return String(str).replace(/[&<>"']/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+    });
+  }
+  function sanitizeName(raw){
+    var cleaned = raw.replace(/[<>\/"'`]/g, "").trim();
+    return cleaned.slice(0,20);
+  }
+
+  /* ---------------- Local device storage (resume progress) ----------------
+     Saves only to the visitor's own browser. Nothing is sent anywhere. */
+  var LOCAL_KEY = "computerAdventureProgress_v1";
+
+  function saveLocalProgress(){
+    try{
+      var payload = {
+        lang: state.lang, name: state.name, age: state.age, avatar: state.avatar,
+        levelStars: state.levelStars, levelDone: state.levelDone,
+        totalStars: state.totalStars, totalCorrect: state.totalCorrect,
+        savedAt: new Date().toISOString()
+      };
+      window.localStorage.setItem(LOCAL_KEY, JSON.stringify(payload));
+    } catch(e){ /* localStorage unavailable - fail silently, never block gameplay */ }
+  }
+
+  function loadLocalProgress(){
+    try{
+      var raw = window.localStorage.getItem(LOCAL_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch(e){ return null; }
+  }
+
+  function clearLocalProgress(){
+    try{ window.localStorage.removeItem(LOCAL_KEY); } catch(e){ /* ignore */ }
+  }
+
+  function showScreen(id){
+    var screens = document.querySelectorAll(".screen");
+    for (var i=0;i<screens.length;i++){ screens[i].classList.add("hidden"); }
+    $(id).classList.remove("hidden");
+    state.currentScreen = id;
+    window.scrollTo({top:0, behavior:"smooth"});
+  }
+  function updateChip(){
+    var chip = $("playerChip");
+    if (state.name){
+      chip.classList.add("show");
+      $("chipName").textContent = state.name;
+      $("chipAvatar").textContent = state.avatar;
+      $("chipStars").textContent = state.totalStars;
+      $("chipStarsLabel").textContent = T().pointsLabel;
+      $("chipAge").textContent = state.age ? (state.age + " " + T().ageSuffix) : "";
+    }
+    saveLocalProgress();
+  }
+
+  /* ---------------- Language ---------------- */
+  function setLanguage(lang){
+    state.lang = lang;
+    var html = document.documentElement;
+    html.setAttribute("lang", lang);
+    html.setAttribute("dir", lang === "ar" ? "rtl" : "ltr");
+    html.classList.toggle("lang-en", lang === "en");
+
+    $("langToggle").classList.add("show");
+    $("toggleAr").classList.toggle("active", lang === "ar");
+    $("toggleEn").classList.toggle("active", lang === "en");
+
+    applyStaticText();
+    updateChip();
+
+    // Re-render whatever dynamic screen is currently visible
+    if (state.currentScreen === "screen-map"){ renderMap(); }
+    else if (state.currentScreen === "screen-quiz"){ renderQuestion(); }
+    else if (state.currentScreen === "screen-result" && state.lastResult){ renderResultScreen(state.lastResult); }
+    else if (state.currentScreen === "screen-certificate"){ renderCertificate(); }
+    else if (state.currentScreen === "screen-setup"){ buildAvatarGrid(); }
+    else if (state.currentScreen === "screen-resume"){
+      $("resumeTitle").textContent = T().resumeTitle;
+      $("resumeText").textContent = T().resumeText(state.name);
+      $("resumeContinueBtn").textContent = T().resumeContinueBtn;
+      $("resumeNewBtn").textContent = T().resumeNewBtn;
+    }
+  }
+
+  function applyStaticText(){
+    var t = T();
+    document.title = state.lang === "ar" ? "مغامرة الحاسوب" : "Computer Adventure";
+
+    $("brandName").textContent = t.brandName;
+    $("brandTag").textContent = t.brandTag;
+
+    $("welcomeEyebrow").textContent = t.welcomeEyebrow;
+    $("welcomeTitle").innerHTML = t.welcomeTitleHTML;
+    $("welcomeSub").textContent = t.welcomeSub;
+    var fl = $("featureList"); fl.innerHTML = "";
+    t.features.forEach(function(f){
+      var parts = f.split(/\s(.+)/);
+      var li = document.createElement("li");
+      li.innerHTML = '<span class="feature-dot">'+ parts[0] +'</span><span>'+ escapeHTML(parts[1]) +'</span>';
+      fl.appendChild(li);
+    });
+    $("startBtn").textContent = t.startBtn;
+    $("badge1").textContent = t.badge1;
+    $("badge2").textContent = t.badge2;
+
+    $("setupTitle").textContent = t.setupTitle;
+    $("setupSub").textContent = t.setupSub;
+    $("nameLabel").textContent = t.nameLabel;
+    $("playerName").placeholder = t.namePlaceholder;
+    $("ageLabel").textContent = t.ageLabel;
+    $("playerAge").placeholder = t.agePlaceholder;
+    $("avatarLabel").textContent = t.avatarLabel;
+    $("setupContinueBtn").textContent = t.setupContinueBtn;
+
+    $("mapTitle").textContent = t.mapTitle;
+
+    $("printCertBtn").textContent = t.printCertBtn;
+    $("restartBtn").textContent = t.restartBtn;
+    $("certKicker").textContent = t.certKicker;
+    $("certTitle").textContent = t.certTitle;
+    $("certStarsLabel").textContent = t.certStarsLabel;
+    $("certScoreLabel").textContent = t.certScoreLabel;
+    $("certLevelLabel").textContent = t.certLevelLabel;
+    $("certAgeLabel").textContent = t.certAgeLabel;
+    $("certCredit").textContent = t.certCredit;
+
+    $("siteFooter").innerHTML = escapeHTML(t.footer) + ' · <span class="credit">' + escapeHTML(t.footerCredit) + '</span>';
+  }
+
+  $("chooseAr").addEventListener("click", function(){ setLanguage("ar"); showScreen("screen-welcome"); });
+  $("chooseEn").addEventListener("click", function(){ setLanguage("en"); showScreen("screen-welcome"); });
+  $("toggleAr").addEventListener("click", function(){ setLanguage("ar"); });
+  $("toggleEn").addEventListener("click", function(){ setLanguage("en"); });
+
+  /* ---------------- Avatar grid ---------------- */
+  function buildAvatarGrid(){
+    var grid = $("avatarGrid");
+    var previouslySelected = state.avatar;
+    grid.innerHTML = "";
+    AVATARS.forEach(function(av){
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "avatar-opt" + (av === previouslySelected ? " selected" : "");
+      btn.textContent = av;
+      btn.setAttribute("aria-label", (state.lang === "en" ? "Choose character " : "اختيار الشخصية ") + av);
+      btn.addEventListener("click", function(){
+        var all = grid.querySelectorAll(".avatar-opt");
+        all.forEach(function(b){ b.classList.remove("selected"); });
+        btn.classList.add("selected");
+        state.avatar = av;
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  /* ---------------- Level map ---------------- */
+  function renderMap(){
+    var t = T();
+    var wrap = $("levelNodes");
+    wrap.innerHTML = "";
+    var doneCount = 0;
+
+    LEVELS.forEach(function(level, idx){
+      var isDone = !!state.levelDone[level.id];
+      var isLocked = idx > 0 && !state.levelDone[LEVELS[idx-1].id];
+      if (isDone) doneCount++;
+
+      var node = document.createElement("div");
+      node.className = "level-node" + (isLocked ? " locked" : "") + (isDone ? " done" : "");
+      node.setAttribute("role","button");
+      node.setAttribute("tabindex", isLocked ? "-1" : "0");
+
+      var starsHtml = "";
+      var stars = state.levelStars[level.id] || 0;
+      for (var s=1;s<=3;s++){ starsHtml += (s<=stars ? "⭐" : "☆"); }
+
+      var levelWord = state.lang === "en" ? "Level" : "المرحلة";
+
+      node.innerHTML =
+        '<div class="node-icon">'+ level.icon +'</div>' +
+        '<div class="node-info">' +
+          '<b>' + levelWord + ' ' + level.id + ': ' + escapeHTML(level.title[state.lang]) + '</b>' +
+          '<span>' + escapeHTML(level.desc[state.lang]) + '</span>' +
+        '</div>' +
+        (isLocked
+          ? '<div class="node-lock">🔒</div>'
+          : '<div class="node-stars">'+ starsHtml +'</div>');
+
+      if (!isLocked){
+        node.addEventListener("click", function(){ startLevel(level.id); });
+        node.addEventListener("keydown", function(e){
+          if (e.key === "Enter" || e.key === " "){ e.preventDefault(); startLevel(level.id); }
+        });
+      }
+      wrap.appendChild(node);
+    });
+
+    $("mapProgressLabel").textContent = t.mapProgress(doneCount, LEVELS.length);
+    $("mapProgressFill").style.width = (doneCount / LEVELS.length * 100) + "%";
+
+    if (doneCount === LEVELS.length){
+      renderCertificate();
+    }
+  }
+
+  /* ---------------- Quiz flow ---------------- */
+  function startLevel(levelId){
+    state.currentLevel = levelId;
+    state.currentQ = 0;
+    state.levelCorrect = 0;
+    renderQuestion();
+    showScreen("screen-quiz");
+  }
+
+  function getLevel(){
+    return LEVELS.find(function(l){ return l.id === state.currentLevel; });
+  }
+
+  function renderQuestion(){
+    var t = T();
+    var level = getLevel();
+    if (!level) return;
+    var q = level.questions[state.currentQ];
+    state.answeredThisQ = false;
+
+    $("quizLevelTag").textContent = t.quizLevelTag(level.id, level.title[state.lang]);
+
+    var progWrap = $("quizProgress");
+    progWrap.innerHTML = "";
+    level.questions.forEach(function(_, i){
+      var dot = document.createElement("span");
+      dot.className = "quiz-dot" + (i < state.currentQ ? " done" : (i === state.currentQ ? " active" : ""));
+      progWrap.appendChild(dot);
+    });
+
+    $("questionText").textContent = q.q[state.lang];
+
+    var optionsGrid = $("optionsGrid");
+    optionsGrid.innerHTML = "";
+    var letters = t.optionLetters;
+    q.options[state.lang].forEach(function(opt, i){
+      var btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.innerHTML = '<span class="option-letter">'+ letters[i] +'</span><span>'+ escapeHTML(opt) +'</span>';
+      btn.addEventListener("click", function(){ handleAnswer(i, btn); });
+      optionsGrid.appendChild(btn);
+    });
+
+    $("feedbackBox").classList.remove("show","good","bad");
+    $("nextQBtn").disabled = true;
+    $("nextQBtn").textContent = (state.currentQ === level.questions.length - 1) ? t.showResultBtn : t.nextBtn;
+  }
+
+  function handleAnswer(selectedIdx, btnEl){
+    if (state.answeredThisQ) return;
+    state.answeredThisQ = true;
+
+    var t = T();
+    var level = getLevel();
+    var q = level.questions[state.currentQ];
+    var allBtns = document.querySelectorAll("#optionsGrid .option-btn");
+    allBtns.forEach(function(b){ b.disabled = true; });
+
+    var isCorrect = selectedIdx === q.correct;
+    if (isCorrect){
+      btnEl.classList.add("correct");
+      state.levelCorrect++;
+      state.totalCorrect++;
+    } else {
+      btnEl.classList.add("wrong");
+      allBtns[q.correct].classList.add("correct");
+    }
+
+    var fb = $("feedbackBox");
+    fb.classList.add("show", isCorrect ? "good" : "bad");
+    $("feedbackIcon").textContent = isCorrect ? "✅" : "💡";
+    $("feedbackText").textContent = (isCorrect ? t.feedbackGood : t.feedbackBad) + q.explain[state.lang];
+
+    $("nextQBtn").disabled = false;
+  }
+
+  $("nextQBtn").addEventListener("click", function(){
+    var level = getLevel();
+    if (state.currentQ < level.questions.length - 1){
+      state.currentQ++;
+      renderQuestion();
+    } else {
+      finishLevel();
+    }
+  });
+
+  function finishLevel(){
+    var level = getLevel();
+    var total = level.questions.length;
+    var correct = state.levelCorrect;
+    var stars = correct >= 4 ? 3 : (correct === 3 ? 2 : 1);
+
+    var prevStars = state.levelStars[level.id] || 0;
+    if (stars > prevStars){
+      state.totalStars += (stars - prevStars);
+      state.levelStars[level.id] = stars;
+    }
+    state.levelDone[level.id] = true;
+
+    state.lastResult = { levelId:level.id, stars:stars, correct:correct, total:total, isLast: !LEVELS.find(function(l){return l.id === level.id+1;}) };
+    updateChip();
+    renderResultScreen(state.lastResult);
+    showScreen("screen-result");
+  }
+
+  function renderResultScreen(res){
+    var t = T();
+    var level = LEVELS.find(function(l){ return l.id === res.levelId; });
+
+    $("resultBadge").textContent = res.stars === 3 ? t.resultBadge3 : (res.stars === 2 ? t.resultBadge2 : t.resultBadge1);
+    $("resultTitle").textContent = t.resultTitle(level.title[state.lang]);
+    $("resultScore").textContent = t.resultScore(res.correct, res.total);
+
+    var starSpans = document.querySelectorAll("#resultStars span");
+    starSpans.forEach(function(s, i){ s.classList.toggle("earned", i < res.stars); });
+
+    $("resultMapBtn").textContent = t.resultMapBtn;
+    var nextBtn = $("resultNextBtn");
+    if (!res.isLast){
+      nextBtn.textContent = t.resultNextBtn;
+      var nextLevel = LEVELS.find(function(l){ return l.id === res.levelId + 1; });
+      nextBtn.onclick = function(){ startLevel(nextLevel.id); };
+    } else {
+      nextBtn.textContent = t.resultCertBtn;
+      nextBtn.onclick = function(){ renderCertificate(); showScreen("screen-certificate"); };
+    }
+  }
+
+  $("resultMapBtn").addEventListener("click", function(){
+    renderMap();
+    showScreen("screen-map");
+  });
+
+  /* ---------------- Certificate ---------------- */
+  function renderCertificate(){
+    var t = T();
+    var pct = Math.round((state.totalCorrect / state.totalQuestions) * 100);
+    var tier = pct >= 85 ? "high" : (pct >= 60 ? "mid" : "low");
+    var titles = APPRECIATION[state.lang][tier];
+    var title = titles[Math.floor(Math.random() * titles.length)];
+
+    $("certName").textContent = state.avatar + "  " + state.name;
+    $("certStars").textContent = state.totalStars;
+    $("certScore").textContent = pct + "%";
+    $("certLevel").textContent = title;
+    $("certAge").textContent = state.age ? (state.age + " " + t.ageSuffix) : "—";
+
+    var msg = pct >= 85 ? t.certMsgHigh : (pct >= 60 ? t.certMsgMid : t.certMsgLow);
+    $("certMessage").textContent = msg;
+  }
+
+  $("printCertBtn").addEventListener("click", function(){ window.print(); });
+
+  $("resumeContinueBtn").addEventListener("click", function(){
+    renderMap();
+    showScreen("screen-map");
+  });
+
+  $("resumeNewBtn").addEventListener("click", function(){
+    clearLocalProgress();
+    state.name = ""; state.age = null; state.avatar = AVATARS[0];
+    state.levelStars = {}; state.levelDone = {};
+    state.totalStars = 0; state.totalCorrect = 0; state.certLogged = false;
+    $("playerChip").classList.remove("show");
+    buildAvatarGrid();
+    showScreen("screen-setup");
+  });
+
+  $("restartBtn").addEventListener("click", function(){
+    state.currentLevel = 0;
+    state.currentQ = 0;
+    state.levelCorrect = 0;
+    state.levelStars = {};
+    state.levelDone = {};
+    state.totalStars = 0;
+    state.totalCorrect = 0;
+    state.certLogged = false;
+    updateChip();
+    renderMap();
+    showScreen("screen-map");
+  });
+
+  /* ---------------- Setup / navigation ---------------- */
+  $("startBtn").addEventListener("click", function(){ showScreen("screen-setup"); });
+
+  $("setupContinueBtn").addEventListener("click", function(){
+    var t = T();
+    var raw = $("playerName").value || "";
+    var clean = sanitizeName(raw);
+    var nameOk = true, ageOk = true;
+
+    if (!clean){
+      $("nameError").textContent = t.nameError;
+      nameOk = false;
+    } else {
+      $("nameError").textContent = "";
+    }
+
+    var ageRaw = ($("playerAge").value || "").trim();
+    var ageNum = parseInt(ageRaw, 10);
+    if (!ageRaw || isNaN(ageNum)){
+      $("ageError").textContent = t.ageErrorEmpty;
+      ageOk = false;
+    } else if (ageNum < 5 || ageNum > 18){
+      $("ageError").textContent = t.ageErrorRange;
+      ageOk = false;
+    } else {
+      $("ageError").textContent = "";
+    }
+
+    if (!nameOk){ $("playerName").focus(); return; }
+    if (!ageOk){ $("playerAge").focus(); return; }
+
+    state.name = clean;
+    state.age = ageNum;
+    updateChip();
+    renderMap();
+    showScreen("screen-map");
+  });
+
+  $("playerName").addEventListener("keydown", function(e){
+    if (e.key === "Enter"){ e.preventDefault(); $("setupContinueBtn").click(); }
+  });
+
+  /* ---------------- Init ---------------- */
+  buildAvatarGrid();
+
+  (function initApp(){
+    var saved = loadLocalProgress();
+    if (saved && saved.name && saved.lang){
+      setLanguage(saved.lang);
+      state.name = saved.name;
+      state.age = saved.age || null;
+      state.avatar = saved.avatar || AVATARS[0];
+      state.levelStars = saved.levelStars || {};
+      state.levelDone = saved.levelDone || {};
+      state.totalStars = saved.totalStars || 0;
+      state.totalCorrect = saved.totalCorrect || 0;
+      buildAvatarGrid();
+      updateChip();
+      $("resumeTitle").textContent = T().resumeTitle;
+      $("resumeText").textContent = T().resumeText(state.name);
+      $("resumeContinueBtn").textContent = T().resumeContinueBtn;
+      $("resumeNewBtn").textContent = T().resumeNewBtn;
+      showScreen("screen-resume");
+    } else {
+      showScreen("screen-language");
+    }
+  })();
+
+})();
+</script>
+</body>
+</html>
