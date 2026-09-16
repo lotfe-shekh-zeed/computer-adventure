@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+  <title data-i18n="page_title">مغامرة الحاسوب — رحلة تعلّم أساسيات التقنية</title>
+  <meta name="description" content="لعبة تعليمية تفاعلية لتعلم أساسيات الحاسوب والتقنية للأعمار من 8 إلى 15 سنة">
+  <meta name="theme-color" content="#0D1030">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<svg class="circuit-bg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <g stroke="#5C63C4" stroke-width="1.4" fill="none">
+    <path d="M0 120 H180 L220 160 H420 L460 120 H700"/>
+    <path d="M0 400 H120 L160 440 H360 V560 L400 600 H620 L660 560 H900"/>
+    <path d="M1200 200 H1000 L960 240 H760"/>
+    <path d="M1200 620 H980 L940 580 H700 L660 620 H520"/>
+    <path d="M300 0 V80 L340 120"/>
+    <path d="M900 800 V700 L860 660"/>
+  </g>
+  <g fill="#5C63C4">
+    <circle cx="180" cy="120" r="4"/><circle cx="420" cy="160" r="4"/><circle cx="460" cy="120" r="4"/>
+    <circle cx="360" cy="440" r="4"/><circle cx="400" cy="600" r="4"/><circle cx="620" cy="600" r="4"/>
+    <circle cx="1000" cy="200" r="4"/><circle cx="760" cy="240" r="4"/>
+    <circle cx="980" cy="620" r="4"/><circle cx="520" cy="620" r="4"/>
+  </g>
+</svg>
+
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">💻</div>
+      <div class="brand-text">
+        <b data-i18n="app_title">مغامرة الحاسوب</b>
+        <span data-i18n="app_subtitle">رحلة تعلّم أساسيات التقنية</span>
+      </div>
+    </div>
+
+    <button id="back-btn" class="nav-btn" onclick="goBack()">
+  <span data-i18n="back_button">رجوع</span>
+</button>
+
+    <div class="topbar-controls">
+      <!-- قائمة اختيار اللغة -->
+      <div class="lang-switch">
+        <select id="langSelect">
+          <option value="ar" selected>العربية</option>
+          <option value="he">עברית</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+
+      <div class="player-chip" id="playerChip">
+        <div class="player-avatar-sm" id="chipAvatar">🙂</div>
+        <div class="player-meta">
+          <b id="chipName">—</b>
+          <span class="stars-total">⭐ <span id="chipStars">0</span> <span data-i18n="pts_label">نقطة</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main>
+
+    <!-- SCREEN 1: WELCOME -->
+    <section class="screen" id="screen-welcome">
+      <div class="card">
+        <div class="welcome-grid">
+          <div>
+            <span class="eyebrow" data-i18n="welcome_eyebrow">🧭 لعبة تعليمية تفاعلية · من 8 إلى 15 سنة</span>
+            <h1 class="welcome-title"><span data-i18n="welcome_title_1">اكتشف عالم</span> <em data-i18n="welcome_title_2">الحاسوب والتقنية</em> <span data-i18n="welcome_title_3">خطوة بخطوة</span></h1>
+            <p class="welcome-sub" data-i18n="welcome_sub">
+              انضم إلى رحلة ممتعة عبر خمس مراحل تعلّمك أساسيات الحاسوب، والبرمجيات، والأمان الرقمي،
+              وكيف توازن بين التقنية وحياتك وصحتك — واجمع النجوم لتحصل على شهادة تقدير في النهاية.
+            </p>
+            <ul class="feature-list">
+              <li><span class="feature-dot">🧩</span> <span data-i18n="feat_1">5 مراحل تعليمية بأسئلة متنوعة وممتعة</span></li>
+              <li><span class="feature-dot">🏅</span> <span data-i18n="feat_2">نجوم ونقاط تُجمع مع كل إجابة صحيحة</span></li>
+              <li><span class="feature-dot">🎓</span> <span data-i18n="feat_3">شهادة تقدير مخصصة باسمك في النهاية</span></li>
+            </ul>
+            <button class="btn btn-primary" id="startBtn"><span data-i18n="start_btn">ابدأ الرحلة</span> <span class="arrow-icon">←</span></button>
+          </div>
+          <div class="hero-art">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <rect x="30" y="40" width="140" height="95" rx="10" fill="#2A3080"/>
+              <rect x="42" y="52" width="116" height="71" rx="4" fill="#0FD6B4" opacity="0.85"/>
+              <rect x="70" y="140" width="60" height="10" rx="3" fill="#3A4090"/>
+              <rect x="55" y="150" width="90" height="8" rx="4" fill="#3A4090"/>
+              <circle cx="100" cy="87" r="22" fill="#0D1030"/>
+              <path d="M92 87 l6 6 12 -13" stroke="#F4B740" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <div class="orbit-badge b1" data-i18n="badge_points">⭐ +10 نقاط</div>
+            <div class="orbit-badge b2" data-i18n="badge_safe">🔒 آمن دائمًا</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 2: PRAYER REMINDER (ثابت باللغة العربية دائماً) -->
+    <section class="screen hidden" id="screen-prayer">
+      <div class="card prayer-card arabic-fixed">
+        <div class="prayer-icon">🕌</div>
+        <h2 class="prayer-title">قبل أن نبدأ رحلتنا...</h2>
+        <p class="prayer-text">
+          تذكّر دائمًا أن تبدأ يومك وأعمالك بذكر الله والصلاة، فهي قبل كل شيء.
+          احرص على أداء صلاتك، ثم عد إلينا بقلبٍ مطمئن لنبدأ رحلة التعلّم معًا 🌟
+        </p>
+        <div class="prayer-actions">
+          <button class="btn btn-primary" id="prayerContinueBtn">تابعت الصلاة، هيا بنا ←</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: SETUP (name + avatar) -->
+    <section class="screen hidden" id="screen-setup">
+      <div class="card">
+        <h2 class="setup-title" data-i18n="setup_title">من أنت يا بطل؟</h2>
+        <p class="setup-sub" data-i18n="setup_sub">اختر اسمك وشخصيتك المفضلة لتبدأ رحلتك في عالم التقنية</p>
+
+        <label class="field-label" for="playerName" data-i18n="label_name">اسمك</label>
+        <input type="text" id="playerName" maxlength="20" data-i18n-ph="ph_name" placeholder="اكتب اسمك هنا">
+        <div class="field-error" id="nameError"></div>
+
+        <label class="field-label" style="margin-top:20px;" data-i18n="label_avatar">اختر شخصيتك</label>
+        <div class="avatar-grid" id="avatarGrid"></div>
+
+        <button class="btn btn-primary" id="setupContinueBtn" style="width:100%; justify-content:center;" data-i18n="setup_btn">ابدأ المغامرة 🚀</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: LEVEL MAP -->
+    <section class="screen hidden" id="screen-map">
+      <div class="card">
+        <div class="map-head">
+          <h2 class="map-title" data-i18n="map_title">خريطة المراحل</h2>
+          <div class="map-progress-wrap">
+            <span id="mapProgressLabel">0 / 5</span>
+            <div class="map-progress-bar"><div class="map-progress-fill" id="mapProgressFill" style="width:0%"></div></div>
+          </div>
+        </div>
+        <p class="map-sub">
+          <span data-i18n="map_sub">أكمل المراحل بالترتيب وافتح بوابة التحدي التالية.</span>
+          <span class="map-stars" id="mapStarsLabel">⭐ 0</span>
+        </p>
+        <div class="path-wrap">
+          <div class="level-nodes" id="levelNodes"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 5: QUIZ -->
+    <section class="screen hidden" id="screen-quiz">
+      <div class="card">
+        <div class="quiz-top">
+          <span class="quiz-level-tag" id="quizLevelTag">المرحلة 1</span>
+          <div class="quiz-progress" id="quizProgress"></div>
+        </div>
+        <div class="quiz-question-label" id="quizQuestionLabel">السؤال 1 من 5</div>
+        <h3 class="question-text" id="questionText"></h3>
+        <div class="options-grid" id="optionsGrid"></div>
+        <div class="feedback-box" id="feedbackBox" role="status" aria-live="polite">
+          <span id="feedbackIcon">✅</span>
+          <span id="feedbackText"></span>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn btn-primary" id="nextQBtn" disabled><span data-i18n="next_btn">التالي</span> <span class="arrow-icon">←</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 6: LEVEL RESULT -->
+    <section class="screen hidden" id="screen-result">
+      <div class="card result-card">
+        <div class="eyebrow" id="resultBadge">🎉 ممتاز</div>
+        <h2 class="result-title" id="resultTitle">أكملت المرحلة!</h2>
+        <div class="result-stars" id="resultStars">
+          <span>⭐</span><span>⭐</span><span>⭐</span>
+        </div>
+        <p class="result-score" id="resultScore">4 من 5 إجابات صحيحة</p>
+        <div class="prayer-actions">
+          <button class="btn btn-ghost" id="resultMapBtn" data-i18n="map_btn">خريطة المراحل</button>
+          <button class="btn btn-primary" id="resultNextBtn"><span>المرحلة التالية</span> <span class="arrow-icon">←</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN 7: CERTIFICATE -->
+    <section class="screen hidden" id="screen-certificate">
+      <div class="cert-wrap">
+        <div class="certificate">
+          <div class="cert-seal">🏆</div>
+          <div class="cert-kicker" data-i18n="cert_kicker">شهادة تقدير وإنجاز</div>
+          <h2 class="cert-title" data-i18n="app_title">مغامرة الحاسوب</h2>
+          <div class="cert-name" id="certName">—</div>
+          <p class="cert-body" id="certMessage">
+            لقد أظهرت فهمًا رائعًا لأساسيات الحاسوب والتقنية، واجتزت جميع المراحل بجدارة.
+          </p>
+          <div class="cert-stats">
+            <div class="cert-stat"><b id="certStars">0</b><span data-i18n="cert_stars_label">نجمة ⭐</span></div>
+            <div class="cert-stat"><b id="certScore">0%</b><span data-i18n="cert_score_label">نسبة الإجابات الصحيحة</span></div>
+            <div class="cert-stat"><b id="certLevel">مستكشف تقني</b><span data-i18n="cert_title_label">اللقب المكتسب</span></div>
+          </div>
+          <div class="cert-actions">
+            <button class="btn btn-ghost" id="printCertBtn" data-i18n="print_btn">🖨️ طباعة الشهادة</button>
+            <button class="btn btn-gold" id="restartBtn" data-i18n="restart_btn">↺ العب مرة أخرى</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer><span data-i18n="footer_text">مغامرة الحاسوب © موقع تعليمي مخصص للأطفال واليافعين — التعلم أولًا، ومتعة دائماً 💙</span></footer>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
