@@ -20,7 +20,7 @@
     defaultLang: "ar",
 
     // بريد الدعم الفني — ✏️ غيّره إلى بريدك الحقيقي
-    supportEmail: "support@your-domain.com",
+    supportEmail: "lotfe.shekh.zeed.1@gmail.com",
 
     // بيانات عامة
     minAge: 10,
