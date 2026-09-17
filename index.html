@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="htmlRoot">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0D1030">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="color-scheme" content="dark light">
+
+  <!-- ⚠️ سياسة أمان المحتوى (CSP) — يمكن تشديدها عبر سيرفر عند النشر -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self';
+                 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+                 font-src 'self' https://fonts.gstatic.com data:;
+                 img-src 'self' data:;
+                 script-src 'self';
+                 connect-src 'self';
+                 object-src 'none';
+                 base-uri 'self';
+                 form-action 'self' mailto:;
+                 frame-ancestors 'none';">
+
+  <title>مغامرة الحاسوب | Computer Adventure</title>
+  <meta name="description" content="لعبة تعليمية تفاعلية لتعلّم أساسيات الحاسوب والتقنية للأعمار من 10 إلى 18 سنة - Interactive educational game for learning computer basics (ages 10-18)">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="مغامرة الحاسوب">
+  <meta property="og:description" content="رحلة تفاعلية ممتعة لتعلّم أساسيات الحاسوب والتقنية">
+  <meta property="og:type" content="website">
+
+  <!-- Fonts: Tajawal/Cairo for Arabic, Heebo/Rubik for Hebrew -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cairo:wght@400;500;600;700&family=Heebo:wght@400;500;700;800;900&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<!-- ============ خلفية SVG (دارة إلكترونية) ============ -->
+<svg class="circuit-bg" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <g stroke="#5C63C4" stroke-width="1.4" fill="none">
+    <path d="M0 120 H180 L220 160 H420 L460 120 H700"/>
+    <path d="M0 400 H120 L160 440 H360 V560 L400 600 H620 L660 560 H900"/>
+    <path d="M1200 200 H1000 L960 240 H760"/>
+    <path d="M1200 620 H980 L940 580 H700 L660 620 H520"/>
+    <path d="M300 0 V80 L340 120"/>
+    <path d="M900 800 V700 L860 660"/>
+  </g>
+  <g fill="#5C63C4">
+    <circle cx="180" cy="120" r="4"/><circle cx="420" cy="160" r="4"/>
+    <circle cx="460" cy="120" r="4"/><circle cx="360" cy="440" r="4"/>
+    <circle cx="400" cy="600" r="4"/><circle cx="620" cy="600" r="4"/>
+    <circle cx="1000" cy="200" r="4"/><circle cx="760" cy="240" r="4"/>
+    <circle cx="980" cy="620" r="4"/><circle cx="520" cy="620" r="4"/>
+  </g>
+</svg>
+
+<div class="app">
+
+  <!-- ============ الشريط العلوي ============ -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="icon-btn hidden" id="backBtn" type="button"
+              data-i18n-aria="ui.back" aria-label="رجوع">
+        <span aria-hidden="true" id="backArrow">→</span>
+      </button>
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">💻</div>
+        <div class="brand-text">
+          <b data-i18n="ui.brandName">مغامرة الحاسوب</b>
+          <span data-i18n="ui.brandTagline">رحلة تعلّم أساسيات التقنية</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="icon-btn" id="langBtn" type="button"
+              data-i18n-aria="ui.changeLang" aria-label="تغيير اللغة" title="🌐">
+        🌐
+      </button>
+      <button class="icon-btn" id="helpBtn" type="button"
+              data-i18n-aria="ui.help" aria-label="مساعدة">❓</button>
+
+      <div class="player-chip" id="playerChip">
+        <div class="player-avatar-sm" id="chipAvatar">🙂</div>
+        <div class="player-meta">
+          <b id="chipName">—</b>
+          <span class="stars-total">⭐ <span id="chipStars">0</span>
+            <span data-i18n="ui.points">نقطة</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ============================================================
+         شاشة 1: اختيار اللغة (أول ما يراه الزائر)
+         ============================================================ -->
+    <section class="screen" id="screen-language" aria-labelledby="langTitle">
+      <div class="card lang-card">
+        <h1 class="lang-title" id="langTitle">اختر لغتك · בחר שפה</h1>
+        <p class="lang-sub">Choose your language · اختر اللغة للمتابعة</p>
+        <div class="lang-grid">
+          <button class="lang-card-btn" data-lang="ar" type="button">
+            <span class="lang-flag">🇸🇦</span>
+            <b>العربية</b>
+            <small>Arabic · RTL</small>
+          </button>
+          <button class="lang-card-btn" data-lang="he" type="button">
+            <span class="lang-flag">🇮🇱</span>
+            <b>עברית</b>
+            <small>Hebrew · LTR</small>
+          </button>
+        </div>
+        <p class="lang-footnote">🔒 بياناتك محفوظة محليًا فقط · Your data is stored locally</p>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         شاشة 2: تعريفيّة باللعبة (تُعرض بعد اختيار اللغة)
+         ============================================================ -->
+    <section class="screen hidden" id="screen-about" aria-labelledby="aboutTitle">
+      <div class="card about-card">
+        <span class="eyebrow" data-i18n="about.eyebrow">🎮 لعبة تعليمية تفاعلية</span>
+        <h2 class="about-title" id="aboutTitle" data-i18n="about.title">مرحبًا بك في مغامرة الحاسوب!</h2>
+        <p class="about-p" data-i18n="about.intro"></p>
+
+        <div class="age-badge">
+          <span class="age-icon">🎂</span>
+          <div>
+            <b data-i18n="about.ageTitle">الفئة العمرية: 10 – 18 سنة</b>
+            <small data-i18n="about.ageSub">مناسبة للمرحلة المتوسطة والإعدادية والثانوية</small>
+          </div>
+        </div>
+
+        <div class="about-features">
+          <div class="feature-box">
+            <span class="fb-icon">🧩</span>
+            <b data-i18n="about.f1Title">5 مراحل تعليمية</b>
+            <small data-i18n="about.f1Text">تدرّب على أساسيات الحاسوب خطوة بخطوة</small>
+          </div>
+          <div class="feature-box">
+            <span class="fb-icon">🏅</span>
+            <b data-i18n="about.f2Title">نجوم ونقاط</b>
+            <small data-i18n="about.f2Text">اجمع النجوم مع كل إجابة صحيحة</small>
+          </div>
+          <div class="feature-box">
+            <span class="fb-icon">🎓</span>
+            <b data-i18n="about.f3Title">شهادة تقدير</b>
+            <small data-i18n="about.f3Text">احصل على شهادة باسمك عند إكمال الرحلة</small>
+          </div>
+        </div>
+
+        <h3 class="about-how" data-i18n="about.howTitle">كيف تلعب؟</h3>
+        <ol class="about-steps">
+          <li data-i18n="about.step1">أدخل اسمك واختر شخصيتك المفضّلة.</li>
+          <li data-i18n="about.step2">ابدأ بالمرحلة الأولى وافتح المراحل تدريجيًا.</li>
+          <li data-i18n="about.step3">اقرأ السؤال واختر الإجابة الصحيحة من الخيارات.</li>
+          <li data-i18n="about.step4">اجمع 3 نجوم في كل مرحلة للحصول على أعلى تقييم.</li>
+          <li data-i18n="about.step5">أكمل المراحل الخمس واحصل على شهادتك!</li>
+        </ol>
+
+        <button class="btn btn-primary btn-block" id="aboutContinueBtn" type="button"
+                data-i18n="about.cta">ابدأ الآن ←</button>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         شاشة 3: قسم الصلاة (اختياري — عربي فقط)
+         ⚠️ لإزالة هذا القسم: احذف هذا الـ section + احذف
+         <script src="js/components/prayer.js"> من نهاية الملف.
+         ============================================================ -->
+    <section class="screen hidden" id="screen-prayer" aria-labelledby="prayerTitle">
+      <div class="card prayer-card">
+        <div class="prayer-icon" aria-hidden="true">🕌</div>
+        <h2 class="prayer-title" id="prayerTitle" data-i18n="prayer.title">قبل أن نبدأ رحلتنا...</h2>
+        <p class="prayer-text" data-i18n="prayer.text"></p>
+        <div class="prayer-actions">
+          <button class="btn btn-primary btn-block" id="prayerContinueBtn" type="button"
+                  data-i18n="prayer.cta">تابعت الصلاة، هيا بنا ←</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         شاشة 4: إعداد اللاعب (الاسم + الشخصية)
+         ============================================================ -->
+    <section class="screen hidden" id="screen-setup" aria-labelledby="setupTitle">
+      <div class="card">
+        <h2 class="setup-title" id="setupTitle" data-i18n="setup.title">من أنت يا بطل؟</h2>
+        <p class="setup-sub" data-i18n="setup.subtitle"></p>
+
+        <label class="field-label" for="playerName" data-i18n="setup.nameLabel">اسمك</label>
+        <input type="text" id="playerName" maxlength="20" autocomplete="off"
+               spellcheck="false" data-i18n-placeholder="setup.namePlaceholder"
+               placeholder="اكتب اسمك هنا">
+        <div class="field-error" id="nameError" role="alert" aria-live="polite"></div>
+
+        <label class="field-label" style="margin-top:20px;" data-i18n="setup.avatarLabel">اختر شخصيتك</label>
+        <div class="avatar-grid" id="avatarGrid" role="radiogroup"
+             data-i18n-aria="setup.avatarLabel" aria-label="اختيار الشخصية"></div>
+
+        <button class="btn btn-primary btn-block" id="setupContinueBtn" type="button"
+                data-i18n="setup.cta">ابدأ المغامرة 🚀</button>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         شاشة 5: خريطة المراحل
+         ============================================================ -->
+    <section class="screen hidden" id="screen-map" aria-labelledby="mapTitle">
+      <div class="card">
+        <div class="map-head">
+          <h2 class="map-title" id="mapTitle" data-i18n="map.title">خريطة المراحل</h2>
+          <div class="map-progress-wrap">
+            <span id="mapProgressLabel">0 / 5</span>
+            <div class="map-progress-bar" aria-hidden="true">
+              <div class="map-progress-fill" id="mapProgressFill" style="width:0%"></div>
+            </div>
+          </div>
+        </div>
+        <p class="map-sub">
+          <span data-i18n="map.subtitle">أكمل المراحل بالترتيب وافتح بوابة التحدي التالية.</span>
+          <span class="map-stars" id="mapStarsLabel">⭐ 0</span>
+        </p>
+        <div class="level-nodes" id="levelNodes"></div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         شاشة 6: الاختبار
+         ============================================================ -->
+    <section class="screen hidden" id="screen-quiz" aria-labelledby="questionText">
+      <div class="card">
+        <div class="quiz-top">
+          <span class="quiz-level-tag" id="quizLevelTag">—</span>
+          <div class="quiz-progress" id="quizProgress" aria-hidden="true"></div>
+        </div>
+        <div class="quiz-question-label" id="quizQuestionLabel"></div>
+        <h3 class="question-text" id="questionText"></h3>
+        <div class="options-grid" id="optionsGrid" role="radiogroup"></div>
+        <div class="feedback-box" id="feedbackBox" role="status" aria-live="polite">
+          <span id="feedbackIcon" aria-hidden="true">✅</span>
+          <span id="feedbackText"></span>
+        </div>
+        <div class="quiz-actions">
+          <button class="btn btn-primary" id="nextQBtn" type="button" disabled
+                  data-i18n="quiz.next">التالي ←</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         شاشة 7: نتيجة المرحلة
+         ============================================================ -->
+    <section class="screen hidden" id="screen-result" aria-labelledby="resultTitle">
+      <div class="card result-card">
+        <div class="eyebrow" id="resultBadge">🎉</div>
+        <h2 class="result-title" id="resultTitle"></h2>
+        <div class="result-stars" id="resultStars" aria-hidden="true">
+          <span>⭐</span><span>⭐</span><span>⭐</span>
+        </div>
+        <p class="result-score" id="resultScore"></p>
+        <div class="prayer-actions">
+          <button class="btn btn-ghost" id="resultMapBtn" type="button"
+                  data-i18n="result.mapBtn">خريطة المراحل</button>
+          <button class="btn btn-primary" id="resultNextBtn" type="button">—</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         شاشة 8: الشهادة
+         ============================================================ -->
+    <section class="screen hidden" id="screen-certificate">
+      <div class="cert-wrap">
+        <div class="certificate" id="certificate">
+          <div class="cert-seal" aria-hidden="true">🏆</div>
+          <div class="cert-kicker" data-i18n="cert.kicker">شهادة تقدير وإنجاز</div>
+          <h2 class="cert-title" data-i18n="cert.title">مغامرة الحاسوب</h2>
+          <div class="cert-name" id="certName">—</div>
+          <p class="cert-body" id="certMessage"></p>
+          <div class="cert-stats">
+            <div class="cert-stat"><b id="certStars">0</b><span data-i18n="cert.stars">نجمة ⭐</span></div>
+            <div class="cert-stat"><b id="certScore">0%</b><span data-i18n="cert.score">نسبة الإجابات الصحيحة</span></div>
+            <div class="cert-stat"><b id="certLevel">—</b><span data-i18n="cert.title2">اللقب المكتسب</span></div>
+          </div>
+          <div class="cert-actions">
+            <button class="btn btn-ghost" id="printCertBtn" type="button"
+                    data-i18n="cert.print">🖨️ طباعة الشهادة</button>
+            <button class="btn btn-gold" id="restartBtn" type="button"
+                    data-i18n="cert.restart">↺ العب مرة أخرى</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <span data-i18n="ui.footer">© مغامرة الحاسوب — التعلم أولًا، والمتعة دائمًا 💙</span>
+  </footer>
+</div>
+
+<!-- ============================================================
+     نافذة المساعدة والبلاغ (Modal)
+     ============================================================ -->
+<div class="modal hidden" id="helpModal" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="modal-backdrop" data-close-modal></div>
+  <div class="modal-panel">
+    <button class="modal-close" type="button" data-close-modal
+            data-i18n-aria="ui.close" aria-label="إغلاق">✕</button>
+    <h2 class="modal-title" id="helpTitle" data-i18n="help.title">المساعدة والبلاغ</h2>
+    <p class="modal-sub" data-i18n="help.subtitle"></p>
+
+    <form id="helpForm" novalidate>
+      <label class="field-label" for="helpType" data-i18n="help.typeLabel">نوع الرسالة</label>
+      <select id="helpType" required>
+        <option value="bug" data-i18n="help.typeBug">خطأ تقني / مشكلة في الموقع</option>
+        <option value="lang" data-i18n="help.typeLang">خطأ لغوي / إملائي</option>
+        <option value="question" data-i18n="help.typeQuestion">مشكلة في سؤال أو إجابة</option>
+        <option value="help" data-i18n="help.typeHelp">أحتاج مساعدة</option>
+        <option value="other" data-i18n="help.typeOther">أخرى</option>
+      </select>
+
+      <label class="field-label" for="helpMessage" data-i18n="help.msgLabel">رسالتك</label>
+      <textarea id="helpMessage" rows="5" maxlength="1000" required
+                data-i18n-placeholder="help.msgPlaceholder"
+                placeholder="اكتب وصفًا موجزًا للمشكلة..."></textarea>
+
+      <label class="field-label" for="helpEmail" data-i18n="help.emailLabel">
+        بريدك الإلكتروني (اختياري)
+      </label>
+      <input type="email" id="helpEmail" autocomplete="email" maxlength="120"
+             data-i18n-placeholder="help.emailPlaceholder" placeholder="example@mail.com">
+
+      <div class="field-error" id="helpError" role="alert" aria-live="polite"></div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" data-close-modal
+                data-i18n="help.cancel">إلغاء</button>
+        <button type="submit" class="btn btn-primary" id="helpSendBtn"
+                data-i18n="help.send">إرسال</button>
+      </div>
+    </form>
+
+    <div class="help-thanks hidden" id="helpThanks">
+      <div class="thanks-icon">✅</div>
+      <p data-i18n="help.thanks"></p>
+      <button type="button" class="btn btn-primary" data-close-modal
+              data-i18n="ui.close">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ Scripts (الترتيب مهم) ============ -->
+<script src="js/config.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/i18n/ar.js"></script>
+<script src="js/i18n/he.js"></script>
+<script src="js/components/prayer.js"></script>
+<script src="js/components/help.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
